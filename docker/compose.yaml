@@ -1,0 +1,53 @@
+# Docker Compose for rag-on-me
+#
+# Usage - local development:
+# 1. Copy `.env.example` to `.env` at the repository root and set values for
+#    `POSTGRES_PASSWORD` (and others if desired).
+# 2. Start only the local services (the `db` service is in the `local` profile):
+#    `docker compose --profile local -f docker/compose.yaml up -d`
+#
+# Usage - demo/production:
+# - Do NOT pass `--profile local`. The `db` service will not be started and
+#   the compose file can be used while your app connects to an external DB
+#   through environment variables or secrets (recommended).
+
+version: "3.9"
+
+services:
+  db:
+    image: postgres:alpine3.21
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-postgres}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
+      POSTGRES_DB: "${POSTGRES_DB:-app_db}"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - db_data:/var/lib/postgresql/data/pgdata
+    profiles:
+      - local
+    # Publish port only when running with the `local` profile
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-app_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  default:
+    name: rag_on_me
+
+volumes:
+  db_data:
+    name: rag_on_me_db_data
+    driver: local
+
