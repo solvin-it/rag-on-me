@@ -12,6 +12,7 @@ OPENAI_EMBEDDING_MODEL: str = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embeddin
 POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
 POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "change_me_locally")
 POSTGRES_DB: str = os.getenv("POSTGRES_DB", "app_db")
+POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")
 POSTGRES_PORT: int = int(os.getenv("POSTGRES_PORT", 5432))
 
 
@@ -29,7 +30,7 @@ class Settings:
             "password": POSTGRES_PASSWORD,
             "database": POSTGRES_DB,
             "port": POSTGRES_PORT,
-            "host": "localhost",
+            "host": POSTGRES_HOST
         }
         
 

@@ -26,7 +26,6 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data/pgdata
-      # auto-run SQL at first startup
       - ./initdb:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-app_db}"]
