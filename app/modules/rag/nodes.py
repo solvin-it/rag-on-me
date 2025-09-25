@@ -18,7 +18,7 @@ retrieve = ToolNode([retrieve_tool])
 
 def query_or_respond(state: MessagesState):
     """Generate tool call for retrieval or respond directly."""
-    llm_with_tools = llm.bind_tools([retrieve_tool])
+    llm_with_tools = llm.bind_tools([retrieve_tool]).bind(tool_choice="required")
     response = llm_with_tools.invoke(state["messages"])
 
     return {"messages": [response]}

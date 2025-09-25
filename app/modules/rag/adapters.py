@@ -1,5 +1,5 @@
-from ...core.config import settings
-# from core.config import settings
+# from ...core.config import settings
+from core.config import settings
 from functools import lru_cache
 from langchain.chat_models import init_chat_model
 from langchain_openai import OpenAIEmbeddings
@@ -10,7 +10,8 @@ from langchain_postgres import PGEngine, PGVectorStore
 def get_llm() -> object:
     return init_chat_model(
         model=settings.openai_chat_model,
-        model_provider="openai"
+        model_provider="openai",
+        temperature=0
     )
 
 @lru_cache
