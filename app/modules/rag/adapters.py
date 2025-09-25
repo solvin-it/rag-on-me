@@ -7,18 +7,18 @@ from langchain_postgres import PGEngine, PGVectorStore
 
 
 @lru_cache
-def get_llm():
+def get_llm() -> object:
     return init_chat_model(
         model=settings.openai_chat_model,
         model_provider="openai"
     )
 
 @lru_cache
-def get_embeddings():
+def get_embeddings() -> OpenAIEmbeddings:
     return OpenAIEmbeddings(model=settings.openai_embedding_model)
 
 @lru_cache
-def get_vector_store():
+def get_vector_store() -> PGVectorStore:
     engine = PGEngine.from_connection_string(url=settings.get_database_url())
     return PGVectorStore.create_sync(
         engine=engine,
