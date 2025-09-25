@@ -6,6 +6,7 @@ from ..rag.adapters import get_vector_store
 # TODO: Add error handling and logging
 # TODO: Make chunk size and overlap configurable
 # TODO: Handle duplicates in the vector store
+# TODO: Add metadata support
 def ingest_markdown_file(file_path: str, namespace: str) -> None:
     """
     Ingests a markdown file into the vector store.
