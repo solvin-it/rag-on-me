@@ -1,11 +1,10 @@
-# from ...core.config import Settings
-from core.config import Settings
+from ...core.config import settings
+# from core.config import settings
 from functools import lru_cache
 from langchain.chat_models import init_chat_model
 from langchain_openai import OpenAIEmbeddings
 from langchain_postgres import PGEngine, PGVectorStore
 
-settings = Settings()
 
 @lru_cache
 def get_llm():

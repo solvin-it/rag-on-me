@@ -24,6 +24,7 @@ class Settings:
         self.openai_api_key = OPENAI_API_KEY
         self.openai_chat_model = OPENAI_CHAT_MODEL
         self.openai_embedding_model = OPENAI_EMBEDDING_MODEL
+        self.allowed_origins = ["*"]  # Adjust this in production for security
 
         self.database_settings = {
             "user": POSTGRES_USER,
@@ -33,8 +34,9 @@ class Settings:
             "host": POSTGRES_HOST
         }
         
-
     def get_database_url(self) -> str:
         return f"postgresql+psycopg://{self.database_settings['user']}:{self.database_settings['password']}@{self.database_settings['host']}:{self.database_settings['port']}/{self.database_settings['database']}"
+    
+settings = Settings()
     
 # TODO: Add logging configuration settings
