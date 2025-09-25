@@ -11,11 +11,9 @@
 #   the compose file can be used while your app connects to an external DB
 #   through environment variables or secrets (recommended).
 
-version: "3.9"
-
 services:
   db:
-    image: postgres:alpine3.21
+    image: pgvector/pgvector:pg17-trixie
     restart: unless-stopped
     env_file:
       - ../.env
@@ -24,13 +22,12 @@ services:
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
       POSTGRES_DB: "${POSTGRES_DB:-app_db}"
       PGDATA: /var/lib/postgresql/data/pgdata
-    volumes:
-      - db_data:/var/lib/postgresql/data/pgdata
-    profiles:
-      - local
-    # Publish port only when running with the `local` profile
     ports:
       - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data/pgdata
+      # auto-run SQL at first startup
+      - ./initdb:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-app_db}"]
       interval: 10s
@@ -50,4 +47,3 @@ volumes:
   db_data:
     name: rag_on_me_db_data
     driver: local
-
