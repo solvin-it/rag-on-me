@@ -6,13 +6,12 @@ from ..rag.adapters import get_vector_store
 # TODO: Add error handling and logging
 # TODO: Make chunk size and overlap configurable
 # TODO: Handle duplicates in the vector store
-def ingest_markdown_file(file_path: str, namespace: str) -> None:
+def ingest_markdown_file(file_path: str) -> None:
     """
     Ingests a markdown file into the vector store.
 
     Args:
         file_path (str): The path to the markdown file.
-        namespace (str): The namespace to use in the vector store.
     """
     # Load the markdown file
     loader = UnstructuredMarkdownLoader(file_path)
@@ -33,6 +32,6 @@ def ingest_markdown_file(file_path: str, namespace: str) -> None:
     vector_store = get_vector_store()
 
     # Add documents to the vector store with the specified namespace
-    vector_store.add_documents(documents=document_splits, namespace=namespace)
+    vector_store.add_documents(documents=document_splits)
 
 # TODO: Add more file type support (e.g., PDF, DOCX)

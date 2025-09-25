@@ -37,10 +37,8 @@ def initialize(file_name: str):
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(status_code=404, detail=f"File not found in app/sources: {file_name}")
 
-    namespace = "default"
-
     try:
-        ingest_markdown_file(file_path=str(file_path), namespace=namespace)
+        ingest_markdown_file(file_path=str(file_path))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ingestion failed: {e}")
 
