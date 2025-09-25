@@ -36,3 +36,5 @@ class Settings:
 
     def get_database_url(self) -> str:
         return f"postgresql+psycopg://{self.database_settings['user']}:{self.database_settings['password']}@{self.database_settings['host']}:{self.database_settings['port']}/{self.database_settings['database']}"
+    
+# TODO: Add logging configuration settings
