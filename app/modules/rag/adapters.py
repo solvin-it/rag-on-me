@@ -1,5 +1,5 @@
-# from ...core.config import settings
-from core.config import settings
+from ...core.config import settings
+# from core.config import settings
 from functools import lru_cache
 from langchain.chat_models import init_chat_model
 from langchain_openai import OpenAIEmbeddings
@@ -24,7 +24,9 @@ def get_vector_store() -> PGVectorStore:
     return PGVectorStore.create_sync(
         engine=engine,
         table_name="documents",
-        embedding_service=get_embeddings()
+        embedding_service=get_embeddings(),
+        metadata_columns=["source"],
+        metadata_json_column="metadata"
     )
 
 def get_vector_size() -> int:
