@@ -16,7 +16,7 @@ services:
     image: pgvector/pgvector:pg17-trixie
     restart: unless-stopped
     env_file:
-      - ../.env
+      - .env
     environment:
       POSTGRES_USER: "${POSTGRES_USER:-postgres}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
@@ -38,11 +38,8 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  app:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    image: rag-on-me:latest
+  rag-on-me:
+    image: fernandogonzzz/rag-on-me:latest
     env_file:
       - .env
     environment:
