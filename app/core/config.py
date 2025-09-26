@@ -15,7 +15,6 @@ POSTGRES_DB: str = os.getenv("POSTGRES_DB", "app_db")
 POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")
 POSTGRES_PORT: int = int(os.getenv("POSTGRES_PORT", 5432))
 
-
 class Settings:
     
     def __init__(self):
@@ -36,6 +35,9 @@ class Settings:
         
     def get_database_url(self) -> str:
         return f"postgresql+psycopg://{self.database_settings['user']}:{self.database_settings['password']}@{self.database_settings['host']}:{self.database_settings['port']}/{self.database_settings['database']}"
+    
+    def get_checkpoint_url(self) -> str:
+        return f"postgresql://{self.database_settings['user']}:{self.database_settings['password']}@{self.database_settings['host']}:{self.database_settings['port']}/{self.database_settings['database']}"
     
 settings = Settings()
     

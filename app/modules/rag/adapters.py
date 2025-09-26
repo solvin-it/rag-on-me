@@ -1,5 +1,4 @@
 from ...core.config import settings
-# from core.config import settings
 from functools import lru_cache
 from langchain.chat_models import init_chat_model
 from langchain_openai import OpenAIEmbeddings
