@@ -35,7 +35,25 @@ async def lifespan(app: FastAPI):
         raise e
     # Shutdown code
 
-app = FastAPI(lifespan=lifespan)
+openapi_tags = [
+    {"name": "Health", "description": "Liveness and readiness endpoints."},
+    {"name": "Initialization", "description": "Ingest and initialize vector store."},
+    {"name": "Chat", "description": "Chat endpoints backed by LangGraph RAG pipeline."},
+    {"name": "Debug", "description": "Debugging and inspection endpoints for the graph state."},
+]
+
+app = FastAPI(
+    title="RAG-on-me",
+    description=(
+        "Lightweight Retrieval-Augmented-Generation (RAG) demo that wires a FastAPI HTTP "
+        "surface to a LangGraph runtime, a Postgres+pgvector vector store, and OpenAI models."
+    ),
+    version="0.1.0",
+    contact={"name": "Solvin", "url": "https://solvin.co", "email": "josefernando.a.gonzales@gmail.com"},
+    license_info={"name": "MIT"},
+    openapi_tags=openapi_tags,
+    lifespan=lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -46,16 +64,16 @@ app.add_middleware(
 )
 # TODO: Restrict default origins and require API key authentication in production deployments.
 
-@app.post("/health")
+@app.post("/health", tags=["Health"], summary="Liveness check")
 def health_check():
     # TODO: Surface readiness information (graph compiled, dependencies reachable) in the health response.
     return {"status": "healthy"}
 
-@app.post("/initialize")
+@app.post("/initialize", tags=["Initialization"], summary="Ingest a source file into the vector store")
 def initialize(file_name: str):
-    """
-    Initializes the vector store by ingesting a markdown file located in the app/sources folder.
-    Only 'cv.md' is supported at the moment.
+    """Initializes the vector store by ingesting a markdown file located in the app/sources folder.
+
+    Only `cv.md` is supported at the moment.
     """
 
     if file_name != "cv.md":
@@ -76,10 +94,12 @@ def initialize(file_name: str):
 
     return {"status": "initialization complete"}
 
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/chat", response_model=ChatResponse, tags=["Chat"], summary="Run a chat turn through the RAG graph")
 def chat(request: ChatRequest):
-    """
-    Handles chat requests through LangGraph, persisted with PostgresSaver.
+    """Handles chat requests through LangGraph and persists checkpoints with PostgresSaver.
+
+    The request expects a `ChatRequest` (see `app/modules/rag/schemas.py`). The response contains
+    a `ChatResponse` with `output`, `checkpoint_id`, and `num_messages`.
     """
     # TODO: Convert to async FastAPI handler so downstream graph calls don't block the event loop.
     # TODO: Enforce input validation for payload size and message count before invoking the graph.
@@ -122,11 +142,9 @@ def chat(request: ChatRequest):
 
 # TODO: Add a /chat/stream endpoint using SSE to stream token-by-token responses.
 
-@app.get("/graph/state")
+@app.get("/graph/state", tags=["Debug"], summary="Inspect LangGraph state for a thread")
 def get_graph_state(thread_id: str | None = None):
-    """
-    Returns the current state of the graph for debugging purposes.
-    """
+    """Returns the current state of the LangGraph for a `thread_id` for debugging and inspection."""
     try:
         snap = app.state.graph.get_state({"configurable": {"thread_id": thread_id}})
         checkpoint_id = snap.config["configurable"].get("checkpoint_id")
