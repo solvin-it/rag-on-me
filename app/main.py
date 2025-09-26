@@ -16,10 +16,13 @@ logging.basicConfig(level=logging.INFO)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # TODO: Expose readiness state and return 503 until the graph compiles successfully.
     # Startup code
     try:
         logging.info("Starting up and compiling the graph...")
         with PostgresSaver.from_conn_string(settings.get_checkpoint_url()) as saver:
+            # TODO: Add retention policy to prune old checkpoints per thread.
+            # TODO: Document enabling LANGGRAPH_AES_KEY so checkpoint data can be encrypted at rest.
             saver.setup()  # create tables if missing
             graph = build_graph().compile(checkpointer=saver)
             app.state.checkpointer = saver
@@ -41,9 +44,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# TODO: Restrict default origins and require API key authentication in production deployments.
 
 @app.post("/health")
 def health_check():
+    # TODO: Surface readiness information (graph compiled, dependencies reachable) in the health response.
     return {"status": "healthy"}
 
 @app.post("/initialize")
@@ -64,6 +69,7 @@ def initialize(file_name: str):
         raise HTTPException(status_code=404, detail=f"File not found in app/sources: {file_name}")
 
     try:
+        # TODO: Make ingestion idempotent to avoid duplicate documents on repeated runs.
         ingest_markdown_file(file_path=str(file_path))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ingestion failed: {e}")
@@ -75,6 +81,9 @@ def chat(request: ChatRequest):
     """
     Handles chat requests through LangGraph, persisted with PostgresSaver.
     """
+    # TODO: Convert to async FastAPI handler so downstream graph calls don't block the event loop.
+    # TODO: Enforce input validation for payload size and message count before invoking the graph.
+    # TODO: Normalize incoming roles (user/assistant/system) and reject unsupported values early.
     if not request.messages or request.messages[-1].role not in ("human", "user"):
         raise HTTPException(status_code=400, detail="The last message must be from the user.")
     
@@ -95,17 +104,23 @@ def chat(request: ChatRequest):
     checkpoint_id = snap.config["configurable"].get("checkpoint_id")
 
     # Get the last AI message as the response
+    # TODO: Trim or summarize older history before invoking the model to control token usage.
+    # TODO: Implement helper that returns the most recent assistant response even with tool call interleaving.
     last_message = snap.values.get("messages", [])[-1] if snap.values.get("messages") else None
 
     logging.info(f"Chat processed with thread ID: {request.thread_id}, checkpoint ID: {checkpoint_id}")
+    # TODO: Attach request-scoped IDs and structured metrics to logs and responses for observability.
 
     response = ChatResponse(
+        # TODO: Standardize response shape to either a single message or a messages list.
         output={"messages": last_message.content} if last_message else {"messages": []},
         checkpoint_id=checkpoint_id,
         num_messages=len(snap.values.get("messages", []))
     )
 
     return response
+
+# TODO: Add a /chat/stream endpoint using SSE to stream token-by-token responses.
 
 @app.get("/graph/state")
 def get_graph_state(thread_id: str | None = None):

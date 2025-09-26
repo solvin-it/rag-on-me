@@ -10,6 +10,7 @@ def build_graph():
 
     graph = StateGraph(MessagesState)
 
+    # TODO: Introduce configurable history trimming/summarization before invoking the LLM.
     graph.add_node("query_or_respond", query_or_respond)
     graph.add_node("retrieve", retrieve)
     graph.add_node("generate", generate)
