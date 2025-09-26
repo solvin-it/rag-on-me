@@ -31,7 +31,13 @@ def ingest_markdown_file(file_path: str) -> None:
     # Get the vector store
     vector_store = get_vector_store()
 
-    # Add documents to the vector store with the specified namespace
+    # Remove existing documents from the same source to avoid duplicates
+    try:
+        vector_store.delete(source=file_name)
+    except Exception as e:
+        print(f"Warning: Failed to delete existing documents from source '{file_name}': {e}")
+
+    # Add documents to the vector store with the specified source
     vector_store.add_documents(documents=document_splits)
 
 # TODO: Add more file type support (e.g., PDF, DOCX)
