@@ -21,8 +21,9 @@ def build_graph():
 
     return graph
 
-def compile_graph():
-    with PostgresSaver.from_conn_string(settings.get_checkpoint_url()) as saver:
-        saver.setup()
-        graph = build_graph().compile(checkpointer=saver)
-    return graph
+# TODO: Reflect on how to best structure this
+# def compile_graph():
+#     with PostgresSaver.from_conn_string(settings.get_checkpoint_url()) as saver:
+#         saver.setup()
+#         graph = build_graph().compile(checkpointer=saver)
+#     return graph
