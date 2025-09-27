@@ -1,11 +1,15 @@
+import uuid
 from langchain_community.document_loaders import UnstructuredMarkdownLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from ..rag.adapters import get_vector_store
+import logging
 
-# TODO: Add error handling and logging
 # TODO: Make chunk size and overlap configurable
-# TODO: Handle duplicates in the vector store
+# TODO: Add more file type support (e.g., PDF, DOCX)
+logger = logging.getLogger(__name__)
+
+
 def ingest_markdown_file(file_path: str) -> None:
     """
     Ingests a markdown file into the vector store.
@@ -13,31 +17,29 @@ def ingest_markdown_file(file_path: str) -> None:
     Args:
         file_path (str): The path to the markdown file.
     """
-    # Load the markdown file
     loader = UnstructuredMarkdownLoader(file_path)
     documents = loader.load()
 
-    # Split documents into smaller chunks if necessary
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     document_splits = splitter.split_documents(documents)
 
-    # Add metadata (source) to each document split
+    ids = []
     file_name = file_path.split("/")[-1]
     for i, doc in enumerate(document_splits, 1):
-        if not doc.metadata:
-            doc.metadata = {}
-        doc.metadata["source"] = f"{file_name}-chunk-{i}"
+        chunk_id = f"{file_name}-chunk-{i}"
+        doc.metadata = doc.metadata or {}
+        doc.metadata["source"] = file_name
 
-    # Get the vector store
+        ids.append(uuid.uuid5(uuid.NAMESPACE_DNS, chunk_id).hex)
+
     vector_store = get_vector_store()
 
-    # Remove existing documents from the same source to avoid duplicates
     try:
-        vector_store.delete(source=file_name)
+        vector_store.delete(ids=ids, collection_only=True)
+        logging.info("Deleted existing docs using where filter")
     except Exception as e:
-        print(f"Warning: Failed to delete existing documents from source '{file_name}': {e}")
+        logging.warning(f"Unexpected error while attempting to delete prior docs for source '{file_name}': {e}")
 
-    # Add documents to the vector store with the specified source
-    vector_store.add_documents(documents=document_splits)
+    vector_store.add_documents(documents=document_splits, ids=ids)
 
 # TODO: Add more file type support (e.g., PDF, DOCX)

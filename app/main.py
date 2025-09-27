@@ -76,8 +76,8 @@ def initialize(file_name: str):
     Only `cv.md` is supported at the moment.
     """
 
-    if file_name != "cv.md":
-        raise HTTPException(status_code=400, detail="Only 'cv.md' is supported at the moment.")
+    if file_name not in ("cv.md", "faq.md"):
+        raise HTTPException(status_code=400, detail="Only 'cv.md' and 'faq.md' are supported at the moment.")
 
     app_dir = Path(__file__).resolve().parent
     sources_dir = app_dir / "sources"
