@@ -63,6 +63,7 @@ def generate(state: MessagesState):
     conversation_messages = [message for message in state["messages"] if message.type in ("human", "system") or (message.type == "ai" and not message.tool_calls)]
 
     # TODO: Augment the system prompt with explicit prompt-injection mitigations before invoking the LLM.
+    # TODO: Verify that it uses the provided conversation context.
     prompt = [SystemMessage(content=system_message_content)] + conversation_messages
 
     response = llm.invoke(prompt)
