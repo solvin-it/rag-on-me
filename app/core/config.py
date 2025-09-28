@@ -23,7 +23,7 @@ class Settings:
         self.openai_api_key = OPENAI_API_KEY
         self.openai_chat_model = OPENAI_CHAT_MODEL
         self.openai_embedding_model = OPENAI_EMBEDDING_MODEL
-        self.allowed_origins = ["*"]  # Adjust this in production for security
+        self.allowed_origins = ["https://solvin-it.github.io"]
 
         self.database_settings = {
             "user": POSTGRES_USER,
